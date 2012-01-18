@@ -1,0 +1,84 @@
+#!/bin/sh
+# This is a general script to start the decorations (eg, tray, conky, etc)
+# for a specified desktop environment / window manager. This script should
+# detect the computer (desktop vs laptop) it is on and choose the settings
+# accordingly.
+
+# Usage: <desktop environment name> <start | stop| restart>
+
+# Decision logic:
+# 1) Which desktop environment?
+#     2) What action are we performing?
+#         3) If relevant: What host are we on?
+
+if [ $# -ne 2 ]; then
+	echo "Usage: $0 <i3 | openbox> <start | stop | restart>" >&2
+	exit 1
+fi
+
+case "$1" in
+i3)
+	case "$2" in
+	start)
+		feh --bg-scale ~/.themes/backgrounds/death-note-custom.png &
+		
+		#trayer --edge bottom --align right --SetDockType true --transparent true --alpha 0 --tint 000000 &
+		#For transparency: trayer --edge bottom --align right --SetDockType true --transparent true --alpha 255
+		
+		case "$HOSTNAME" in
+		beacon)
+			CONKY_CONFIG=conky.i3.beacon.workspace
+			DZEN_WIDTH=840
+			DZEN_HEIGHT=18
+			DZEN_X=$(( (1920 - $DZEN_WIDTH) / 2 ))
+			DZEN_Y=$(( 1080 - $DZEN_HEIGHT ))
+			;;
+		beacon-laptop)
+			CONKY_CONFIG=conky.i3.beacon-laptop.workspace
+			DZEN_WIDTH=660
+			DZEN_HEIGHT=18
+			DZEN_X=$(( (1280 - $DZEN_WIDTH) / 2 ))
+			DZEN_Y=$(( 800 - $DZEN_HEIGHT ))
+			;;
+		esac
+	
+		# Note that dzen exits on button 3 by default.
+		# Use button3 to hide it, and hovering over it to restore it.
+		exec conky -c ~/.config/conky/$CONKY_CONFIG | \
+		     dzen2 -x $DZEN_X -y $DZEN_Y -h 18 -w $DZEN_WIDTH -ta c -p -bg "#000000" -fg "#ffffff" \
+		           -e 'onstart=raise;button3=togglehide;entertitle=unhide' \
+		           -fn "-adobe-helvetica-medium-r-normal-*-11-80-100-*-*-*-iso8859-*" &
+		
+		# Do last since i3 changes the cursor to busy while it executes this script.
+		xsetroot -cursor_name left_ptr &
+		;;
+	stop)
+		killall conky 2> /dev/null
+		killall dzen2 2> /dev/null
+		;;
+	restart)
+		"$0" "$1" stop
+		"$0" "$1" start
+		;;
+	esac
+	;;
+openbox)
+	case "$2" in
+	start)
+		conky -q -d -c ~/.config/conky/conky.openbox.main
+		sleep .5   # So the conkys don't update at same time and make the stats weird
+		conky -q -d -c ~/.config/conky/conky.openbox.services
+		conky -q -d -c ~/.config/conky/conky.openbox.clients
+		;;
+	stop)
+		killall conky 2> /dev/null
+		killall tint2 2> /dev/null
+		;;
+	restart)
+		"$0" "$1" stop
+		"$0" "$1" start
+		;;
+	esac
+	;;
+esac
+

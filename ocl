@@ -1,0 +1,79 @@
+#!/usr/bin/python
+
+import sys, time, re, os, smtplib, email.Message
+from socket import *
+
+def init_payload():
+	payload="GET http://registrar.ucdavis.edu/ocl/opencourses.html HTTP/1.1\r\n" + \
+	"Host: apps.facebook.com\r\n" + \
+	"User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.5) Gecko/2008123017 Firefox/3.0.5\r\n" + \
+	"Accept: text/html,application/xhtml+xml,application/xml;a=0.9,*/*;q=0.8\r\n" + \
+	"Accept-Language: en-us,en;q=0.5\r\n" + \
+	"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n" + \
+	"Keep-Alive: 300\r\n" + \
+	"Connection: keep-alive\r\n" + \
+	"Content-Type: application/x-www-form-urlencoded; charset=UTF-8\r\n" + \
+	"Referer: http://registrar.ucdavis.edu/ocl/opencourses.html\r\n" + \
+	"Pragma: no-cache\r\n" + \
+	"Cache-Control: max-age=0\r\n" + \
+	"\r\n"
+	return payload
+
+def mail(sender='', to='', subject='', text=''):
+	message = email.Message.Message()
+	message["To"]      = to
+	message["From"]    = sender
+	message["Subject"] = subject
+	message.set_payload(text)
+	mailServer = smtplib.SMTP( _URL_ )
+	mailServer.sendmail(sender, to, message.as_string())
+	mailServer.quit()
+
+
+def alert(course):
+	os.system('xmessage -c -buttons "OK - Thanks:0" "' + course + ' is OPEN!" &> /dev/null')
+	
+	
+
+CRN1 = "72114"
+course1 = "ENG 017"
+CRN2 = "72121"
+course2 = "ENG 045"
+
+while True:
+	payload = init_payload()
+	s = socket( AF_INET, SOCK_STREAM )
+	if s is None:
+		print "Could not open socket"
+		quit()
+	s.connect( ('169.237.72.74', 80) )
+	s.send( payload )
+	
+	ocl = ""
+	chunk = s.recv( 100000 )
+	while chunk:
+		ocl = ocl + chunk
+		chunk = s.recv( 100000 )
+		
+	s.close()
+	result1 = re.search(CRN1, ocl)
+	result2 = re.search(CRN2, ocl)
+	# crn: 72114, ENG 017
+	# crn: 72121, ENG 045
+	
+	if result1 is None:
+		print "> " + course1 + " still not open @ " + time.strftime("%H:%M")
+	else:
+		print "> " + course1 + " IS open!"
+		alert(course1)
+		quit()
+	
+	if result2 is None:
+		print "> " + course2 + " still not open @ " + time.strftime("%H:%M")
+	else:
+		print "> " + course2 + " IS open!"
+		alert(course2)
+		quit()
+	
+	print ""
+	time.sleep(30)
