@@ -1,0 +1,36 @@
+#!/bin/sh
+
+#FIND_CMD="find . ! -name . -prune -type f"
+FIND_CMD="find . -type f"
+
+if [ ! -z "$2" ]; then
+	NUM=$2
+else
+	NUM=6
+fi
+
+cd "$1"
+DEST="/tmp/tf"
+idx=0
+while [ -d "$DEST-$idx" ]; do
+	idx=$(( $idx + 1 ))
+done
+DEST="$DEST-$idx"
+mkdir "$DEST"
+
+idx=0
+l=$(( `$FIND_CMD | wc -l` - 1 ))
+while [ $idx -lt $NUM ]; do
+	r=$(( `prand $l` + 1 ))
+	f="`$FIND_CMD | head -n $r | tail -n 1`"
+	fn="`basename $f`"
+	if [ ! -f "$DEST/$fn" ]; then 
+		ln -s "`pwd`/${f}" "$DEST/$fn"
+		idx=$(( $idx + 1 ))
+	fi
+done
+
+{
+	mirage "$DEST"
+	rm -r "$DEST"
+} &> /dev/null &
