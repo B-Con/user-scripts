@@ -20,7 +20,7 @@ case "$1" in
 i3)
 	case "$2" in
 	start)
-		feh --bg-scale ~/.themes/backgrounds/death-note-custom.png &
+		feh --bg-scale ~/.themes/current-wallpaper &
 		
 		#trayer --edge bottom --align right --SetDockType true --transparent true --alpha 0 --tint 000000 &
 		#For transparency: trayer --edge bottom --align right --SetDockType true --transparent true --alpha 255
