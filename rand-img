@@ -23,7 +23,7 @@ l=$(( `$FIND_CMD | wc -l` - 1 ))
 while [ $idx -lt $NUM ]; do
 	r=$(( `prand $l` + 1 ))
 	f="`$FIND_CMD | head -n $r | tail -n 1`"
-	fn="`basename $f`"
+	fn="`basename \"$f\"`"
 	if [ ! -f "$DEST/$fn" ]; then 
 		ln -s "`pwd`/${f}" "$DEST/$fn"
 		idx=$(( $idx + 1 ))
