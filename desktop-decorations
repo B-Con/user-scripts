@@ -45,7 +45,7 @@ i3)
 		# Note that dzen exits on button 3 by default.
 		# Use button3 to hide it, and hovering over it to restore it.
 		exec conky -c ~/.config/conky/$CONKY_CONFIG | \
-		     dzen2 -x $DZEN_X -y $DZEN_Y -h 18 -w $DZEN_WIDTH -ta c -p -bg "#000000" -fg "#ffffff" \
+		     dzen2 -x $DZEN_X -y $DZEN_Y -h $DZEN_HEIGHT -w $DZEN_WIDTH -ta c -p -bg "#000000" -fg "#ffffff" \
 		           -e 'onstart=raise;button3=togglehide;entertitle=unhide' \
 		           -fn "-adobe-helvetica-medium-r-normal-*-11-80-100-*-*-*-iso8859-*" &
 		
