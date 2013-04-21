@@ -1,0 +1,36 @@
+#!/system/bin/sh
+
+# Assumptions:
+#   * The key file format matches the SSH client (eg, both are Dropbear).
+#   * rsync and ssh are in $PATH.
+
+USER="backup"
+export HOME="/system/etc/ssh/user_backup"   # Setting HOME necessary for known_hosts
+KEY_FILE="$HOME/id_backup_user_rsa_key"
+
+SSH_OPTIONS="-p 31415"
+SERVER="192.168.100.2"
+
+SRC_DIR="/sdcard/DCIM/Camera"
+DST_DIR="/media/storage/images/pictures/unsorted/to sort/"
+
+LOG_FILE="/sdcard/tmp/camera-rsync.log"
+
+echo $(date) >> $LOG_FILE
+
+#  * Don't bother with compression. Since the media is already compressed,
+# it may take longer to compress than send.
+#  * Don't delete in the dest, we're supposed to push new files and that's all.
+#  * Delete uploaded source. Need to keep the local cleared out.
+rsync -av --chmod=u=rwX,g=rwX,o=r -e "ssh -i $KEY_FILE $SSH_OPTIONS" "$SRC_DIR" "$USER@$SERVER:$DST_DIR" 2> "$LOG_FILE"
+#--remove-source-files
+ret_code=$?
+
+if [ $ret_code -eq 0 ]; then
+	echo "...success"
+else
+	echo "...failed: " $ret_code
+fi
+
+exit $ret_code
+
