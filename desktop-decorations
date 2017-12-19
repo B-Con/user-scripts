@@ -65,10 +65,10 @@ i3)
 openbox)
 	case "$2" in
 	start)
-		conky -q -d -c ~/.config/conky/conky.openbox.main
-		sleep .5   # So the conkys don't update at same time and make the stats weird
-		conky -q -d -c ~/.config/conky/conky.openbox.services
-		conky -q -d -c ~/.config/conky/conky.openbox.clients
+		#conky -q -d -c ~/.config/conky/conky.openbox.main
+		#sleep .5   # So the conkys don't update at same time and make the stats weird
+		#conky -q -d -c ~/.config/conky/conky.openbox.services
+		#conky -q -d -c ~/.config/conky/conky.openbox.clients
 		;;
 	stop)
 		killall conky 2> /dev/null
