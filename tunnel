@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#DOMAIN=76.184.65.119
+DOMAIN=home.bradconte.com
+#DOMAIN=bradconte.com
+IP=`dig +noall +answer $DOMAIN | awk '{print $5}' | tail -n 1`
+
+# Disable all other outgoing network activity.
+iptables -A OUTPUT -p tcp -d 127.0.0.1 -j ACCEPT 
+iptables -A OUTPUT -p tcp --dport 31415 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 8080 -j ACCEPT
+iptables -A OUTPUT -j REJECT
+
+# Use compression and set it to be the master.
+ssh b-con@$IP -p 31415 -D 8080 -L 11111:localhost:58846 -C -M
+
+# Undo the iptables rules
+iptables -F OUTPUT
+
